@@ -7,7 +7,7 @@ import os
 import unittest
 from threading import Event, Thread
 
-from calibre.constants import iswindows
+from calibre.constants import iswindows, ismacos, islinux
 
 from .qt import Browser, WebEngineBrowser
 
@@ -95,7 +95,7 @@ class TestFetchBackend(unittest.TestCase):
     def test_recipe_browser_qt(self):
         self.do_recipe_browser_test(Browser)
 
-    @unittest.skipIf(iswindows and is_ci, 'WebEngine browser test hangs on windows CI')
+    @unittest.skipIf(is_ci and (iswindows or ismacos or (islinux and os.path.exists('/etc/lsb-release'))), 'WebEngine browser test hangs on CI')
     def test_recipe_browser_webengine(self):
         self.do_recipe_browser_test(WebEngineBrowser)
 

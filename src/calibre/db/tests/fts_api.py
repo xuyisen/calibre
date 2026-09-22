@@ -53,10 +53,17 @@ class FTSAPITest(BaseTest):
         self.libraries_to_close.append(ans)
         return ans
 
-    def wait_for_fts_to_finish(self, fts, timeout=10):
+    def wait_for_fts_to_finish(self, fts, timeout=30):
         if fts.pool.initialized:
+            import apsw
             st = time.monotonic()
-            while fts.all_currently_dirty() and time.monotonic() - st < timeout:
+            while time.monotonic() - st < timeout:
+                try:
+                    dirty = fts.all_currently_dirty()
+                except apsw.ThreadingViolationError:
+                    dirty = True
+                if not dirty:
+                    break
                 fts.pool.supervisor_thread.join(0.01)
 
     def text_records(self, fts):

@@ -18,24 +18,39 @@ def names(path_or_stream):
         return tuple(zf.getnames())
 
 
+class DataSavingWriter(io.BytesIO):
+    """A BytesIO subclass that prevents close() from actually closing the buffer,
+    so that getvalue() can still be called after the archive extraction completes."""
+
+    def close(self):
+        # No-op: prevent the underlying buffer from being closed
+        pass
+
+
 class Writer:
 
     def __init__(self):
         self.outputs = {}
 
     def create(self, filename):
-        b = self.outputs[filename] = io.BytesIO()
+        b = self.outputs[filename] = DataSavingWriter()
         return b
 
     def asdatadict(self):
         return {k: v.getvalue() for k, v in self.outputs.items()}
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        pass
+
 
 def read_file(archive, name):
-    w = Writer()
-    archive.extract(targets=[name], factory=w)
-    for v in w.outputs.values():
-        return v.getvalue()
+    with Writer() as w:
+        archive.extract(targets=[name], factory=w)
+        for v in w.outputs.values():
+            return v.getvalue()
     raise KeyError(f'No file named {name} in archive')
 
 
@@ -101,9 +116,9 @@ def test_basic():
         with open_archive(os.path.join('a.7z')) as zf:
             if set(zf.getnames()) != set(tdata):
                 raise ValueError('names not equal')
-            w = Writer()
-            zf.extractall(factory=w)
-            read_data = w.asdatadict()
+            with Writer() as w:
+                zf.extractall(factory=w)
+                read_data = w.asdatadict()
             if read_data != tdata:
                 raise ValueError('data not equal')
 
