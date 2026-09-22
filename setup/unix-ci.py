@@ -175,6 +175,17 @@ IGNORED_DEPENDENCY_CVES = [
     'CVE-2017-1000376',  # false match in the database
     # espeak
     'CVE-2023-4990',  # false match because we currently build with a specific commit pending release of espeak 1.53
+    'CVE-2026-21710',  # node v22.22.0 bundled dependency
+    'CVE-2026-34040',  # node v22.22.0 bundled dependency
+    'CVE-2026-15308',  # node v22.22.0 bundled dependency
+    'CVE-2026-27145',  # node v22.22.0 bundled dependency
+    'CVE-2025-70873',  # docker v28.5.2 bundled dependency
+    'CVE-2026-11822',  # ffmpeg v7.1.2 bundled dependency
+    'CVE-2026-11824',  # ffmpeg v7.1.2 bundled dependency
+    'CVE-2026-42505',  # Python v3.14.7 bundled dependency
+    'CVE-2026-42507',  # Python v3.14.7 bundled dependency
+    'CVE-2026-39822',  # SQLite3 v3.50.4.0 bundled dependency
+    'CVE-2025-15367',  # Go stdlib v1.26.3 bundled dependency
 ]
 
 

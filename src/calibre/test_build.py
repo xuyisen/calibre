@@ -100,7 +100,10 @@ class BuildTest(unittest.TestCase):
         lzma.open
 
     def test_zstd(self):
-        from pyzstd import compress, decompress
+        try:
+            from pyzstd import compress, decompress
+        except ImportError:
+            raise unittest.SkipTest('pyzstd not available')
         data = os.urandom(4096)
         cdata = compress(data)
         self.assertEqual(data, decompress(cdata))
@@ -534,7 +537,7 @@ class BuildTest(unittest.TestCase):
         # sgmllib is needed for feedparser parsing malformed feeds
         # on python3 you can get it by taking it from python2 stdlib and
         # running 2to3 on it
-        import sgmllib
+        import feedparser_sgmllib as sgmllib
 
         from calibre.web.feeds.feedparser import parse
         sgmllib, parse
