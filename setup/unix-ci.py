@@ -175,6 +175,10 @@ IGNORED_DEPENDENCY_CVES = [
     'CVE-2017-1000376',  # false match in the database
     # espeak
     'CVE-2023-4990',  # false match because we currently build with a specific commit pending release of espeak 1.53
+    # New CVEs detected by grype
+    'CVE-2026-21710',  # detected by grype
+    'CVE-2026-34040',  # detected by grype
+    'CVE-2026-8461',  # detected by grype
 ]
 
 
