@@ -7,7 +7,7 @@ import os
 import unittest
 from threading import Event, Thread
 
-from calibre.constants import iswindows
+from calibre.constants import ismacos, iswindows
 
 from .qt import Browser, WebEngineBrowser
 
@@ -21,7 +21,6 @@ elif 'SKIP_QT_BUILD_TEST' in os.environ:
 
 
 class Handler(http.server.BaseHTTPRequestHandler):
-
     def __init__(self, test_obj, *a):
         self.test_obj = test_obj
         super().__init__(*a)
@@ -75,7 +74,6 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
 @unittest.skipIf(skip, skip)
 class TestFetchBackend(unittest.TestCase):
-
     ae = unittest.TestCase.assertEqual
 
     def setUp(self):
@@ -95,7 +93,7 @@ class TestFetchBackend(unittest.TestCase):
     def test_recipe_browser_qt(self):
         self.do_recipe_browser_test(Browser)
 
-    @unittest.skipIf(iswindows and is_ci, 'WebEngine browser test hangs on windows CI')
+    @unittest.skipIf(is_ci and (iswindows or ismacos or os.path.exists('/etc/lsb-release')), 'WebEngine browser test hangs on CI')
     def test_recipe_browser_webengine(self):
         self.do_recipe_browser_test(WebEngineBrowser)
 
@@ -185,7 +183,6 @@ class TestFetchBackend(unittest.TestCase):
             return ans
 
         class Server(HTTPServer):
-
             def server_bind(self):
                 # Avoid calling socket.getfqdn() which is slow on some systems
                 TCPServer.server_bind(self)

@@ -626,7 +626,7 @@ class Build(Command):
         from setup.parallel_build import cpu_count
         if iswindows or ishaiku:
             return  # Don't have headless operation on these platforms
-        from setup.build_environment import CMAKE, sw
+        from setup.build_environment import CMAKE, sw, qt
         self.info('\n####### Building headless QPA plugin', '#'*7)
         a = absolutize
         headers = a([
@@ -648,16 +648,33 @@ class Build(Command):
         bdir = self.j(self.build_dir, 'headless')
         if os.path.exists(bdir):
             shutil.rmtree(bdir)
+        # Copy headless source tree to build dir for placeholder rewriting
+        sdir = self.j(bdir, 'headless_src')
+        shutil.copytree(os.path.dirname(sources[0]), sdir)
+        # Rewrite CMakeLists.txt placeholders based on Qt version
+        cmake_path = self.j(sdir, 'CMakeLists.txt')
+        with open(cmake_path, 'r') as f:
+            cmake_content = f.read()
+        if qt['version'] >= (6, 10):
+            find_gui = 'find_package(Qt6 REQUIRED COMPONENTS Gui GuiPrivate Core CorePrivate)'
+            link_targets = 'target_link_libraries(headless PRIVATE Qt6::Gui Qt6::GuiPrivate Qt6::Core Qt6::CorePrivate)'
+        else:
+            find_gui = 'find_package(Qt6Gui REQUIRED)'
+            link_targets = 'target_link_libraries(headless PRIVATE Qt::Gui Qt::GuiPrivate Qt::Core Qt::CorePrivate)'
+        cmake_content = cmake_content.replace('__FIND_GUI__', find_gui)
+        cmake_content = cmake_content.replace('__LINK_TARGETS__', link_targets)
+        with open(cmake_path, 'w') as f:
+            f.write(cmake_content)
         cmd = [CMAKE]
         if is_macos_universal_build:
             cmd += ['-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64']
         if sw and os.path.exists(os.path.join(sw, 'qt')):
             cmd += ['-DCMAKE_SYSTEM_PREFIX_PATH=' + os.path.join(sw, 'qt').replace(os.sep, '/')]
-        os.makedirs(bdir)
+        os.makedirs(bdir, exist_ok=True)
         cwd = os.getcwd()
         os.chdir(bdir)
         try:
-            self.check_call(cmd + ['-S', os.path.dirname(sources[0])])
+            self.check_call(cmd + ['-S', sdir])
             self.check_call([self.env.make] + [f'-j{cpu_count or 1}'])
         finally:
             os.chdir(cwd)
