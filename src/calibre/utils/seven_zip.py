@@ -25,17 +25,28 @@ class Writer:
 
     def create(self, filename):
         b = self.outputs[filename] = io.BytesIO()
+        # Prevent the archive machinery from closing the buffer before readback
+        b._real_close = b.close
+        b.close = lambda: None
         return b
 
     def asdatadict(self):
         return {k: v.getvalue() for k, v in self.outputs.items()}
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        for v in self.outputs.values():
+            if hasattr(v, '_real_close'):
+                v._real_close()
+
 
 def read_file(archive, name):
-    w = Writer()
-    archive.extract(targets=[name], factory=w)
-    for v in w.outputs.values():
-        return v.getvalue()
+    with Writer() as w:
+        archive.extract(targets=[name], factory=w)
+        for v in w.outputs.values():
+            return v.getvalue()
     raise KeyError(f'No file named {name} in archive')
 
 
@@ -101,9 +112,9 @@ def test_basic():
         with open_archive(os.path.join('a.7z')) as zf:
             if set(zf.getnames()) != set(tdata):
                 raise ValueError('names not equal')
-            w = Writer()
-            zf.extractall(factory=w)
-            read_data = w.asdatadict()
+            with Writer() as w:
+                zf.extractall(factory=w)
+                read_data = w.asdatadict()
             if read_data != tdata:
                 raise ValueError('data not equal')
 

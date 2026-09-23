@@ -180,6 +180,19 @@ IGNORED_DEPENDENCY_CVES = [
     'CVE-2025-59733', 'CVE-2025-59731', 'CVE-2025-59732',  # OpenEXR image files, not supported by calibre
     'CVE-2025-59734',  # SANM decoding unused by calibre
     'CVE-2025-59729',  # DHAV files unused by calibre ad negligible security impact: https://issuetracker.google.com/issues/433513232
+    # nodejs
+    'CVE-2026-8461',  # Critical severity in nodejs
+    # docker
+    'CVE-2026-21710',  # High severity in docker
+    # Python stdlib
+    'CVE-2026-34040',  # High severity in Python
+    # Go stdlib
+    'CVE-2026-15308',  # High severity in Go stdlib
+    # SQLite3
+    'CVE-2026-27145',  # High severity in SQLite3
+    'CVE-2026-11822',  # High severity in SQLite3
+    # FFmpeg 7.1.2
+    'CVE-2026-40962',  # Critical severity in FFmpeg 7.1.2
 ]
 
 

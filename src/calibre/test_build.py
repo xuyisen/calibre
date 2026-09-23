@@ -95,12 +95,8 @@ class BuildTest(unittest.TestCase):
         detector.close()
         self.assertEqual(detector.result['encoding'], 'utf-8')
 
-    def test_lzma(self):
-        import lzma
-        lzma.open
-
-    def test_zstd(self):
-        from pyzstd import compress, decompress
+    def test_compression(self):
+        from backports.zstd import compress, decompress
         data = os.urandom(4096)
         cdata = compress(data)
         self.assertEqual(data, decompress(cdata))
@@ -534,7 +530,7 @@ class BuildTest(unittest.TestCase):
         # sgmllib is needed for feedparser parsing malformed feeds
         # on python3 you can get it by taking it from python2 stdlib and
         # running 2to3 on it
-        import sgmllib
+        import feedparser_sgmllib as sgmllib
 
         from calibre.web.feeds.feedparser import parse
         sgmllib, parse
